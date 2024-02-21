@@ -5,6 +5,7 @@ import com.sample.token.security.JwtUtil;
 import com.sample.token.services.UserService;
 import org.hibernate.type.descriptor.java.ObjectJavaType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class UserAccessController {
 
     //localhost:8080/user/register
+    @Lazy
     @Autowired
     AuthenticationManager authenticationManager;
     @Autowired
@@ -30,7 +32,7 @@ public class UserAccessController {
     @Autowired
     private JwtUtil jwtUtil;
     @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/authenticate")
     public ResponseEntity<Object> createAuthenticationToken(@RequestBody UserDetails userDetails) throws Exception{
@@ -57,7 +59,7 @@ public class UserAccessController {
     }
     @PostMapping("/register")
     public ResponseEntity<Object> register(@RequestBody UserDetails userDetails){
-        userDetails.setPassWord(bCryptPasswordEncoder.encode(userDetails.getPassWord()));
+        userDetails.setPassWord(passwordEncoder.encode(userDetails.getPassWord()));
         userService.updateUser(userDetails);
         return ResponseEntity.ok().body(userDetails.getUserName()+" details save successfully");
     }
