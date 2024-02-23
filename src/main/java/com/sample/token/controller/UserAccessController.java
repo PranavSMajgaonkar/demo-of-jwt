@@ -1,11 +1,13 @@
 package com.sample.token.controller;
 
+import com.mysql.cj.x.protobuf.Mysqlx;
 import com.sample.token.entities.UserDetails;
 import com.sample.token.security.JwtUtil;
 import com.sample.token.services.UserService;
 import org.hibernate.type.descriptor.java.ObjectJavaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.net.http.HttpResponse;
 
 @Controller
 @RequestMapping("user")
@@ -64,7 +68,7 @@ public class UserAccessController {
         return ResponseEntity.ok().body(userDetails.getUserName()+" details save successfully");
     }
     @GetMapping("/profile")
-    public ResponseEntity<Object> getCurrentUserDetails(){
-        return ResponseEntity.ok().body(userService.findCurrentUser());
+    public ResponseEntity<UserDetails> getCurrentUserDetails(){
+        return userService.findCurrentUser();
     }
 }

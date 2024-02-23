@@ -33,8 +33,7 @@ public class SpringSecurityConfig {
     private UserDetailsService userDetailsService;
     @Autowired
     private JWTRequestFilter jwtRequestFilter;
-//    @Autowired
-//    PasswordEncoder passwordEncoder;
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception{
         final List<GlobalAuthenticationConfigurerAdapter> configures = new ArrayList<>();
@@ -58,7 +57,7 @@ public class SpringSecurityConfig {
         sharedSecurityConfiguration(httpSecurity);
         httpSecurity.securityMatcher("admin").authorizeHttpRequests(auth -> {
             auth.anyRequest().authenticated();
-        }).addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        });//.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
     //this is for the admin access, any request can access.
@@ -68,7 +67,7 @@ public class SpringSecurityConfig {
         httpSecurity.securityMatcher("admin/**").authorizeHttpRequests(auth -> {
             auth.anyRequest()
                     .hasRole("ADMIN");
-        }).addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        });//.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
     //this filter for user profile API
@@ -87,7 +86,7 @@ public class SpringSecurityConfig {
         httpSecurity.securityMatcher("/user/register", "/user/authenticated")
                 .authorizeHttpRequests(auth -> {
                     auth.anyRequest().permitAll();
-                }).addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+                });//.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
     @Bean

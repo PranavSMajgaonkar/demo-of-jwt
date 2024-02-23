@@ -1,6 +1,7 @@
 package com.sample.token.security;
 
 import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +13,8 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    private static final String SECRET_KEY = "yourSecretKey";
+//    @Value("${jwt.secret}")
+    private static final String SECRET_KEY = "vbDFMXnwHVGXER0n8hYG1wnJl+IvRDNcVcqK5t4WSoUal4JlRHHMvwtU9Cm3vf/6XWKdXDNnFcp+4dUv2MhKbw==";
     private static final long EXPIRATION_TIME = 86400000; // 1 day in milliseconds
 
     // retrieve username from jwt token
@@ -81,7 +83,7 @@ public class JwtUtil {
     // check if the token has expired
     public static boolean validateToken(String token, UserDetails userDetails) {
         String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        return (username.equals(userDetails.getUsername()) || !isTokenExpired(token));
     }
 
     private static boolean isTokenExpired(String token) {
@@ -90,7 +92,7 @@ public class JwtUtil {
     }
 
     private static Date extractExpiration(String token) {
-        return extractClaims(token).getExpiration();
+        return (Date) extractClaims(token).get("iat"); //getExpiration();
     }
 
     private static String extractUsername(String token) {

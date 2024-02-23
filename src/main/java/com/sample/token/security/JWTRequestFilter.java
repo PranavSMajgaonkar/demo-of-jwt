@@ -2,6 +2,7 @@ package com.sample.token.security;
 
 import java.io.IOException;
 
+import com.sample.token.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +25,9 @@ public class JWTRequestFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private JwtUtil jwtTokenUtil;
 
     @Override
@@ -39,7 +43,7 @@ public class JWTRequestFilter extends OncePerRequestFilter {
 
         String jwtToken = requestTokenHeader.split(" ")[1].trim();
         String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-        UserDetails userValueObject = userDetailsService.loadUserByUsername(username);
+        UserDetails userValueObject = userService.loadUserByUsername(username);
 
         if (jwtTokenUtil.validateToken(jwtToken, userValueObject)) {
 

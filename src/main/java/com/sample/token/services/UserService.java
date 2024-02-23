@@ -4,6 +4,8 @@ import com.sample.token.repository.UserDetailsRepository;
 import com.sample.token.security.SecurityPrincipal;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -50,8 +52,13 @@ public class UserService implements UserDetailsService {
         return userDetailsRepository.save(userDetails);
     }
 
-    public Optional<com.sample.token.entities.UserDetails> findCurrentUser(){
-        return userDetailsRepository.findById(SecurityPrincipal.getInstance()
-                .getLoggedInPrincipal().getUserName());
+    public ResponseEntity<com.sample.token.entities.UserDetails> findCurrentUser(){
+        try {
+            return  new ResponseEntity<>(userDetailsRepository.findByUserName(SecurityPrincipal
+                    .getInstance().getLoggedInPrincipal().getUserName()), HttpStatus.OK);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }
