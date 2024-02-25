@@ -1,11 +1,13 @@
 package com.sample.token.services;
 
 import com.sample.token.repository.UserDetailsRepository;
+import com.sample.token.security.JwtUtil;
 import com.sample.token.security.SecurityPrincipal;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,16 +28,17 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private  UserDetailsRepository userDetailsRepository;
-
+    @Autowired
+    JwtUtil jwtUtil;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        com.sample.token.entities.UserDetails user = userDetailsRepository.findByUserName(username);
+        com.sample.token.entities.UserDetails user = userDetailsRepository
+                .findByUserName(username);
         if (user != null){
-            Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority(user.getRole()));
-            UserDetails principal = new User(user.getUserName(),user.getPassWord(),authorities);
-            return principal;
+            Collection<GrantedAuthority> authorities = new ArrayList<>();
+            authorities.add(new SimpleGrantedAuthority(user.getRole().toUpperCase()));
+            return new User(user.getUserName(),user.getPassWord(),authorities);
         }
         return null;
     }

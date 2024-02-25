@@ -3,6 +3,7 @@ package com.sample.token.controller;
 import com.mysql.cj.x.protobuf.Mysqlx;
 import com.sample.token.entities.UserDetails;
 import com.sample.token.security.JwtUtil;
+import com.sample.token.security.SecurityPrincipal;
 import com.sample.token.services.UserService;
 import org.hibernate.type.descriptor.java.ObjectJavaType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.net.http.HttpResponse;
+import java.util.Collection;
 
 @Controller
 @RequestMapping("user")
@@ -40,19 +45,24 @@ public class UserAccessController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<Object> createAuthenticationToken(@RequestBody UserDetails userDetails) throws Exception{
+        String token = null, refreshToken = null;
         try {
             authenticate(userDetails.getUserName(),userDetails.getPassWord());
+            final org.springframework.security.core.userdetails.UserDetails userByUsername =
+                    userService.loadUserByUsername(userDetails.getUserName());
+            token = jwtUtil.generateToken(userByUsername);
+            refreshToken = jwtUtil.generateRefreshToken(userByUsername);
         }catch (Exception e){
-            return ResponseEntity.status(403).body("Invalid credentials, please check details and try again");
+            return ResponseEntity.status(403).body(e.getMessage()+" please try again");
         }
-        final org.springframework.security.core.userdetails.UserDetails userByUsername = userService.loadUserByUsername(userDetails.getUserName());
-        final String token = jwtUtil.generateToken(userByUsername);
-        final String refreshToken = jwtUtil.generateRefreshToken(userByUsername);
+//        final org.springframework.security.core.userdetails.UserDetails userByUsername = userService.loadUserByUsername(userDetails.getUserName());
         return ResponseEntity.ok().body(token);
     }
-    private void authenticate(String username, String password) throws Exception{
+    private void authenticate(String  principal,
+                              String  userDetails) throws Exception{
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username,password));
+             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(principal,userDetails));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }catch (DisabledException e){
             throw new Exception("USER DISABLED ",e);
         }catch (BadCredentialsException e){

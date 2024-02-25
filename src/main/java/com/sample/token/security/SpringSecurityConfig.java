@@ -46,7 +46,8 @@ public class SpringSecurityConfig {
         return authConfig.getAuthenticationManager();
     }
     private void sharedSecurityConfiguration(HttpSecurity httpSecurity) throws Exception{
-    httpSecurity.cors(c -> c.configurationSource(corsConfigurationSource())).csrf(AbstractHttpConfigurer::disable)
+    httpSecurity.cors(c -> c.configurationSource(corsConfigurationSource()))
+            .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(httpSecuritySessionManagementConfigurer -> {
                     httpSecuritySessionManagementConfigurer.sessionCreationPolicy(
                             SessionCreationPolicy.STATELESS);
@@ -56,18 +57,17 @@ public class SpringSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
         sharedSecurityConfiguration(httpSecurity);
         httpSecurity.securityMatcher("admin").authorizeHttpRequests(auth -> {
-            auth.anyRequest().authenticated();
-        });//.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+            auth.anyRequest().permitAll();//.hasAnyRole("ADMIN","USER");
+        }).addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
     //this is for the admin access, any request can access.
     @Bean
     public SecurityFilterChain securityFilterChainAdmin(HttpSecurity httpSecurity) throws Exception{
         sharedSecurityConfiguration(httpSecurity);
-        httpSecurity.securityMatcher("admin/**").authorizeHttpRequests(auth -> {
-            auth.anyRequest()
-                    .hasRole("ADMIN");
-        });//.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.securityMatcher("admin/user-list").authorizeHttpRequests(auth -> {
+            auth.anyRequest().hasAuthority("ADMIN");
+        }).addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
     //this filter for user profile API
@@ -75,7 +75,7 @@ public class SpringSecurityConfig {
     public SecurityFilterChain securityFilterChainProfile(HttpSecurity httpSecurity) throws Exception{
         sharedSecurityConfiguration(httpSecurity);
         httpSecurity.securityMatcher("/user/profile").authorizeHttpRequests(auth -> {
-            auth.anyRequest().hasAnyRole("ADMIN","USER");
+            auth.anyRequest().hasAnyAuthority("ADMIN","USER");
         }).addFilterBefore(jwtRequestFilter,UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
@@ -86,9 +86,13 @@ public class SpringSecurityConfig {
         httpSecurity.securityMatcher("/user/register", "/user/authenticated")
                 .authorizeHttpRequests(auth -> {
                     auth.anyRequest().permitAll();
-                });//.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+                }).addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
+//    @Bean
+//    public JWTRequestFilter jwtRequestFilter(){
+//        return new JWTRequestFilter();
+//    }
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
      final CorsConfiguration configuration = new CorsConfiguration();

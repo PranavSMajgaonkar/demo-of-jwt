@@ -17,7 +17,7 @@ import java.util.Objects;
 public class AdminAccessController {
     @Autowired
     private UserService userService;
-    @GetMapping("/user-list")
+    @GetMapping("user-list")
     public ResponseEntity<Object> getAllUserList(){
         return ResponseEntity.ok().body(userService.retrieveAllUserList());
     }
