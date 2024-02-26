@@ -89,10 +89,6 @@ public class SpringSecurityConfig {
                 }).addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
-//    @Bean
-//    public JWTRequestFilter jwtRequestFilter(){
-//        return new JWTRequestFilter();
-//    }
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
      final CorsConfiguration configuration = new CorsConfiguration();

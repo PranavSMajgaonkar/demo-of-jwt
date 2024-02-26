@@ -23,4 +23,6 @@ public class UserDetails {
     private String passWord;
     private String firstName;
     private String role;
+
+
 }

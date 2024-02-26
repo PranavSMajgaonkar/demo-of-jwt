@@ -40,8 +40,7 @@ public class UserAccessController {
     private UserService userService;
     @Autowired
     private JwtUtil jwtUtil;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+
 
     @PostMapping("/authenticate")
     public ResponseEntity<Object> createAuthenticationToken(@RequestBody UserDetails userDetails) throws Exception{
@@ -51,17 +50,17 @@ public class UserAccessController {
             final org.springframework.security.core.userdetails.UserDetails userByUsername =
                     userService.loadUserByUsername(userDetails.getUserName());
             token = jwtUtil.generateToken(userByUsername);
-            refreshToken = jwtUtil.generateRefreshToken(userByUsername);
+//            refreshToken = jwtUtil.generateRefreshToken(userByUsername);
         }catch (Exception e){
             return ResponseEntity.status(403).body(e.getMessage()+" please try again");
         }
 //        final org.springframework.security.core.userdetails.UserDetails userByUsername = userService.loadUserByUsername(userDetails.getUserName());
         return ResponseEntity.ok().body(token);
     }
-    private void authenticate(String  principal,
-                              String  userDetails) throws Exception{
+    private void authenticate(String  principal, String  userDetails) throws Exception{
         try {
-             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(principal,userDetails));
+             Authentication authentication = authenticationManager
+                     .authenticate(new UsernamePasswordAuthenticationToken(principal,userDetails));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }catch (DisabledException e){
             throw new Exception("USER DISABLED ",e);
@@ -72,10 +71,8 @@ public class UserAccessController {
         }
     }
     @PostMapping("/register")
-    public ResponseEntity<Object> register(@RequestBody UserDetails userDetails){
-        userDetails.setPassWord(passwordEncoder.encode(userDetails.getPassWord()));
-        userService.updateUser(userDetails);
-        return ResponseEntity.ok().body(userDetails.getUserName()+" details save successfully");
+    public ResponseEntity<String> register(@RequestBody UserDetails userDetails){
+        return userService.updateUser(userDetails);
     }
     @GetMapping("/profile")
     public ResponseEntity<UserDetails> getCurrentUserDetails(){

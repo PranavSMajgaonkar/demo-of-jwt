@@ -1,10 +1,12 @@
 package com.sample.token.services;
 
+import com.sample.token.model.UserDetailsWraper;
 import com.sample.token.repository.UserDetailsRepository;
 import com.sample.token.security.JwtUtil;
 import com.sample.token.security.SecurityPrincipal;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,6 +15,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,6 +33,9 @@ public class UserService implements UserDetailsService {
     private  UserDetailsRepository userDetailsRepository;
     @Autowired
     JwtUtil jwtUtil;
+    @Lazy
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -47,12 +53,26 @@ public class UserService implements UserDetailsService {
         return userDetailsRepository.findByUserName(username);
     }
 
-    public List<com.sample.token.entities.UserDetails> retrieveAllUserList(){
-        return userDetailsRepository.findAll();
+    public List<UserDetailsWraper> retrieveAllUserList(){
+        List<com.sample.token.entities.UserDetails> user = userDetailsRepository.findAll();
+        List<UserDetailsWraper> list = new ArrayList<>();
+        for (com.sample.token.entities.UserDetails u : user){
+            list.add(new UserDetailsWraper(u.getId(),u.getFirstName(),u.getUserName(),u.getRole()));
+        }
+        return list;
     }
 
-    public com.sample.token.entities.UserDetails updateUser(com.sample.token.entities.UserDetails userDetails){
-        return userDetailsRepository.save(userDetails);
+    public ResponseEntity<String> updateUser(com.sample.token.entities.UserDetails userDetails){
+        if (userDetails != null && isPresent(userDetails)) {
+            userDetails.setPassWord(passwordEncoder.encode(userDetails.getPassWord()));
+            userDetailsRepository.save(userDetails);
+            return ResponseEntity.ok().body(userDetails.getUserName()+" details save successfully!!");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already present!!");
+    }
+    private boolean isPresent (com.sample.token.entities.UserDetails userDetails){
+        com.sample.token.entities.UserDetails user = findByUsername(userDetails.getUserName());
+        return user == null;
     }
 
     public ResponseEntity<com.sample.token.entities.UserDetails> findCurrentUser(){
