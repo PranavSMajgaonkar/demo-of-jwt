@@ -2,6 +2,7 @@ package com.sample.token.controller;
 
 import com.mysql.cj.x.protobuf.Mysqlx;
 import com.sample.token.entities.UserDetails;
+import com.sample.token.model.UserReq;
 import com.sample.token.security.JwtUtil;
 import com.sample.token.security.SecurityPrincipal;
 import com.sample.token.services.UserService;
@@ -20,16 +21,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.http.HttpResponse;
 import java.util.Collection;
 
 @Controller
 @RequestMapping("user")
+@CrossOrigin(origins = "http://localhost:3000")
+
 public class UserAccessController {
 
     //localhost:8080/user/register
@@ -43,12 +43,13 @@ public class UserAccessController {
 
 
     @PostMapping("/authenticate")
-    public ResponseEntity<Object> createAuthenticationToken(@RequestBody UserDetails userDetails) throws Exception{
+    public ResponseEntity<String> createAuthenticationToken(@RequestBody UserReq userReq) throws Exception{
         String token = null, refreshToken = null;
+        System.out.println("username and pass"+userReq.toString());
         try {
-            authenticate(userDetails.getUserName(),userDetails.getPassWord());
+            authenticate(userReq.getUsername(),userReq.getPassword());
             final org.springframework.security.core.userdetails.UserDetails userByUsername =
-                    userService.loadUserByUsername(userDetails.getUserName());
+                    userService.loadUserByUsername(userReq.getUsername());
             token = jwtUtil.generateToken(userByUsername);
 //            refreshToken = jwtUtil.generateRefreshToken(userByUsername);
         }catch (Exception e){
