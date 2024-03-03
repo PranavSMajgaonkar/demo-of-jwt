@@ -1,30 +1,21 @@
 package com.sample.token.controller;
 
-import com.mysql.cj.x.protobuf.Mysqlx;
-import com.sample.token.entities.UserDetails;
+import com.sample.token.entities.EmployeePrimeDetails;
 import com.sample.token.model.UserReq;
 import com.sample.token.security.JwtUtil;
-import com.sample.token.security.SecurityPrincipal;
 import com.sample.token.services.UserService;
-import org.hibernate.type.descriptor.java.ObjectJavaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.http.HttpResponse;
-import java.util.Collection;
 
 @Controller
 @RequestMapping("user")
@@ -48,7 +39,7 @@ public class UserAccessController {
         System.out.println("username and pass"+userReq.toString());
         try {
             authenticate(userReq.getUsername(),userReq.getPassword());
-            final org.springframework.security.core.userdetails.UserDetails userByUsername =
+            final UserDetails userByUsername =
                     userService.loadUserByUsername(userReq.getUsername());
             token = jwtUtil.generateToken(userByUsername);
 //            refreshToken = jwtUtil.generateRefreshToken(userByUsername);
@@ -72,11 +63,11 @@ public class UserAccessController {
         }
     }
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody UserDetails userDetails){
+    public ResponseEntity<String> register(@RequestBody EmployeePrimeDetails userDetails){
         return userService.updateUser(userDetails);
     }
     @GetMapping("/profile")
-    public ResponseEntity<UserDetails> getCurrentUserDetails(){
+    public ResponseEntity<EmployeePrimeDetails> getCurrentUserDetails(){
         return userService.findCurrentUser();
     }
 }

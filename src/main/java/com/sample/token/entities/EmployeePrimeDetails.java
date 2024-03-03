@@ -1,6 +1,5 @@
 package com.sample.token.entities;
 
-import jakarta.annotation.Generated;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +12,7 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "user")
-public class UserDetails {
+public class EmployeePrimeDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
@@ -23,6 +22,4 @@ public class UserDetails {
     private String passWord;
     private String firstName;
     private String role;
-
-
 }

@@ -1,5 +1,6 @@
 package com.sample.token.services;
 
+import com.sample.token.entities.EmployeePrimeDetails;
 import com.sample.token.model.UserDetailsWraper;
 import com.sample.token.repository.UserDetailsRepository;
 import com.sample.token.security.JwtUtil;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 /*In this class you have to extends UserDetailsService which is a inbuilt spring class need to implement method if loadUserByUserName()
 * in this method call your userDetailsRepository method which is findByUserNameAndPassWord()*/
@@ -39,43 +39,43 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        com.sample.token.entities.UserDetails user = userDetailsRepository
+        EmployeePrimeDetails employeePrimeDetails = userDetailsRepository
                 .findByUserName(username);
-        if (user != null){
+        if (employeePrimeDetails != null){
             Collection<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority(user.getRole().toUpperCase()));
-            return new User(user.getUserName(),user.getPassWord(),authorities);
+            authorities.add(new SimpleGrantedAuthority(employeePrimeDetails.getRole().toUpperCase()));
+            return new User(employeePrimeDetails.getUserName(),employeePrimeDetails.getPassWord(),authorities);
         }
         return null;
     }
 
-    public com.sample.token.entities.UserDetails findByUsername(String username){
+    public EmployeePrimeDetails findByUsername(String username){
         return userDetailsRepository.findByUserName(username);
     }
 
     public List<UserDetailsWraper> retrieveAllUserList(){
-        List<com.sample.token.entities.UserDetails> user = userDetailsRepository.findAll();
+        List<EmployeePrimeDetails> employeePrimeDetails = userDetailsRepository.findAll();
         List<UserDetailsWraper> list = new ArrayList<>();
-        for (com.sample.token.entities.UserDetails u : user){
+        for (EmployeePrimeDetails u : employeePrimeDetails){
             list.add(new UserDetailsWraper(u.getId(),u.getFirstName(),u.getUserName(),u.getRole()));
         }
         return list;
     }
 
-    public ResponseEntity<String> updateUser(com.sample.token.entities.UserDetails userDetails){
-        if (userDetails != null && isPresent(userDetails)) {
-            userDetails.setPassWord(passwordEncoder.encode(userDetails.getPassWord()));
-            userDetailsRepository.save(userDetails);
-            return ResponseEntity.ok().body(userDetails.getUserName()+" details save successfully!!");
+    public ResponseEntity<String> updateUser(EmployeePrimeDetails employeePrimeDetails){
+        if (employeePrimeDetails != null && isPresent(employeePrimeDetails)) {
+            employeePrimeDetails.setPassWord(passwordEncoder.encode(employeePrimeDetails.getPassWord()));
+            userDetailsRepository.save(employeePrimeDetails);
+            return ResponseEntity.ok().body(employeePrimeDetails.getUserName()+" details save successfully!!");
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already present!!");
     }
-    private boolean isPresent (com.sample.token.entities.UserDetails userDetails){
-        com.sample.token.entities.UserDetails user = findByUsername(userDetails.getUserName());
+    private boolean isPresent (EmployeePrimeDetails employeePrimeDetails){
+        EmployeePrimeDetails user = findByUsername(employeePrimeDetails.getUserName());
         return user == null;
     }
 
-    public ResponseEntity<com.sample.token.entities.UserDetails> findCurrentUser(){
+    public ResponseEntity<EmployeePrimeDetails> findCurrentUser(){
         try {
             return  new ResponseEntity<>(userDetailsRepository.findByUserName(SecurityPrincipal
                     .getInstance().getLoggedInPrincipal().getUserName()), HttpStatus.OK);
