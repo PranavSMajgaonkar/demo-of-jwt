@@ -3,23 +3,21 @@ package com.sample.token.entities;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @ToString
 @Entity
 @Table
-public class EmployeePrimeDetails {
+public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    @Column(name = "username", nullable = false)
-    private String userName;
-    @Column(name = "password", nullable = false)
-    private String passWord;
+    private long departmentId;
     @Column(nullable = false)
-    private String role;
+    private String departmentName;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "fk_employeeId")
+    private List<Employee> employees;
 }

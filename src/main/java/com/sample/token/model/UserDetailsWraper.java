@@ -7,7 +7,6 @@ import lombok.Data;
 @Data
 public class UserDetailsWraper {
     private int id;
-    private String firstName;
     private String userName;
     private String role;
 }

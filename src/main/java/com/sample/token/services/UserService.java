@@ -2,7 +2,7 @@ package com.sample.token.services;
 
 import com.sample.token.entities.EmployeePrimeDetails;
 import com.sample.token.model.UserDetailsWraper;
-import com.sample.token.repository.UserDetailsRepository;
+import com.sample.token.repository.EmployeePrimeDetailsRepo;
 import com.sample.token.security.JwtUtil;
 import com.sample.token.security.SecurityPrincipal;
 import jakarta.transaction.Transactional;
@@ -30,7 +30,7 @@ import java.util.List;
 public class UserService implements UserDetailsService {
 
     @Autowired
-    private  UserDetailsRepository userDetailsRepository;
+    private EmployeePrimeDetailsRepo employeePrimeDetailsRepo;
     @Autowired
     JwtUtil jwtUtil;
     @Lazy
@@ -39,7 +39,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        EmployeePrimeDetails employeePrimeDetails = userDetailsRepository
+        EmployeePrimeDetails employeePrimeDetails = employeePrimeDetailsRepo
                 .findByUserName(username);
         if (employeePrimeDetails != null){
             Collection<GrantedAuthority> authorities = new ArrayList<>();
@@ -50,14 +50,14 @@ public class UserService implements UserDetailsService {
     }
 
     public EmployeePrimeDetails findByUsername(String username){
-        return userDetailsRepository.findByUserName(username);
+        return employeePrimeDetailsRepo.findByUserName(username);
     }
 
     public List<UserDetailsWraper> retrieveAllUserList(){
-        List<EmployeePrimeDetails> employeePrimeDetails = userDetailsRepository.findAll();
+        List<EmployeePrimeDetails> employeePrimeDetails = employeePrimeDetailsRepo.findAll();
         List<UserDetailsWraper> list = new ArrayList<>();
         for (EmployeePrimeDetails u : employeePrimeDetails){
-            list.add(new UserDetailsWraper(u.getId(),u.getFirstName(),u.getUserName(),u.getRole()));
+            list.add(new UserDetailsWraper(u.getId(),u.getUserName(),u.getRole()));
         }
         return list;
     }
@@ -65,7 +65,7 @@ public class UserService implements UserDetailsService {
     public ResponseEntity<String> updateUser(EmployeePrimeDetails employeePrimeDetails){
         if (employeePrimeDetails != null && isPresent(employeePrimeDetails)) {
             employeePrimeDetails.setPassWord(passwordEncoder.encode(employeePrimeDetails.getPassWord()));
-            userDetailsRepository.save(employeePrimeDetails);
+            employeePrimeDetailsRepo.save(employeePrimeDetails);
             return ResponseEntity.ok().body(employeePrimeDetails.getUserName()+" details save successfully!!");
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already present!!");
@@ -77,7 +77,7 @@ public class UserService implements UserDetailsService {
 
     public ResponseEntity<EmployeePrimeDetails> findCurrentUser(){
         try {
-            return  new ResponseEntity<>(userDetailsRepository.findByUserName(SecurityPrincipal
+            return  new ResponseEntity<>(employeePrimeDetailsRepo.findByUserName(SecurityPrincipal
                     .getInstance().getLoggedInPrincipal().getUserName()), HttpStatus.OK);
         }catch (Exception e){
             e.printStackTrace();
