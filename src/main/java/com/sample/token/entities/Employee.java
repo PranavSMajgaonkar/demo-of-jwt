@@ -34,8 +34,8 @@ public class Employee {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "fk_employeeAddressId")
     private EmployeeAddress employeeAddress;    //employee address is either permanent or current;
-//    @ManyToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "fk_departmentId")
-//    private Department employeeDepartment;
+   @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "deprtment_id")
+    private Department department;
 
 }
